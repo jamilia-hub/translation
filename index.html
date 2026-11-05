@@ -1699,6 +1699,137 @@ input:focus,select:focus,textarea:focus{border-color:#b59b8e!important;outline:2
  #content-main .evo-badge img{width:30px;height:30px}
 }
 </style>
+
+<style id="compact-cards-v061">
+/* Compact two-column work cards on phones: scheduling and checklists first. */
+@media (max-width:699px) {
+  #content-main .cards-grid {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+    margin-bottom:8px;
+  }
+  #content-main .card {
+    padding:9px 8px !important;
+    border-left-width:4px;
+    border-radius:9px;
+    min-width:0;
+  }
+  #content-main .card-title {
+    display:block;
+    font-size:12.5px !important;
+    line-height:1.35;
+    min-height:0;
+  }
+  #content-main .card-title .title-name {
+    display:-webkit-box;
+    -webkit-box-orient:vertical;
+    -webkit-line-clamp:2;
+    line-clamp:2;
+    white-space:normal;
+    word-break:break-word;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    width:100%;
+  }
+  #content-main .card-title .title-vol {
+    display:inline-block;
+    font-size:11px;
+    margin:3px 4px 0 0;
+    vertical-align:middle;
+  }
+  #content-main .card-title .deadline {
+    display:inline-block;
+    padding:2px 5px;
+    font-size:10px;
+    margin-top:3px;
+    vertical-align:middle;
+  }
+  #content-main .card-meta {
+    font-size:10px !important;
+    line-height:1.25 !important;
+    margin-top:5px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  /* Trust remains accessible in its own tab, rather than crowding work cards. */
+  #content-main .card .trust-line {display:none !important;}
+  #content-main .card .actions-row {
+    display:flex;
+    flex-direction:column;
+    align-items:stretch !important;
+    gap:4px;
+    margin-top:8px;
+  }
+  #content-main .card .row-steps.steps-visible {
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    width:100%;
+    gap:3px !important;
+    flex:none;
+  }
+  #content-main .card .steps-visible .check-step {
+    min-width:0 !important;
+    width:100%;
+    min-height:29px;
+    padding:5px 0;
+    font-size:10px;
+    line-height:1.25;
+    justify-content:center;
+    border-radius:7px;
+    white-space:nowrap;
+  }
+  #content-main .card .steps-visible .deliver-chip,
+  #content-main .card .steps-visible .send-tip {
+    grid-column:1/-1;
+    justify-self:stretch;
+    width:100%;
+    text-align:center;
+    margin:0 !important;
+    font-size:11px;
+    min-height:27px;
+  }
+  #content-main .card .row-actions {
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    width:100%;
+    margin:0;
+    gap:4px;
+  }
+  #content-main .card .row-actions .icon-btn {
+    min-width:28px;
+    min-height:28px;
+    font-size:13px;
+  }
+  #content-main .card .page-progress {
+    gap:4px;
+    margin-top:6px;
+    padding:4px;
+    flex-wrap:nowrap;
+  }
+  #content-main .card .page-edit-btn {
+    padding:3px 4px;
+    font-size:10px;
+    min-height:24px;
+  }
+  #content-main .delivered-card {min-height:96px;}
+  #content-main .delivered-card .delivered-stamp {
+    width:34px;
+    height:34px;
+    top:auto;
+    bottom:5px;
+    right:7px;
+    transform:rotate(-12deg);
+    font-size:9px;
+  }
+}
+@media (max-width:360px) {
+  #content-main .cards-grid {gap:5px !important;}
+  #content-main .card {padding:8px 6px !important;}
+  #content-main .card .steps-visible .check-step {font-size:9px;}
+}
+</style>
 </head>
 <body>
 <div class="container">
@@ -3154,20 +3285,10 @@ function renderActive() {
     const monthLabel = `📅 ${y}년 ${parseInt(m)}월`;
     html += `<div class="month-header">${monthLabel} <span class="month-count">${items.length}권</span></div>`;
 
-    // 주별로 더 묶어서 라인 추가
-    let lastWeekKey = null;
-    let firstInMonth = true;
-    items.forEach(({vol, pub, weekKey}) => {
-      if (lastWeekKey !== null && lastWeekKey !== weekKey) {
-        html += `<div class="week-divider"></div>`;
-      }
-      if (firstInMonth || lastWeekKey !== weekKey) {
-        if (!firstInMonth) html += '</div>';
-        html += '<div class="cards-grid">';
-        firstInMonth = false;
-      }
+    // 한 달의 작품은 마감순으로 연속 배치: 주 경계에서도 빈 카드 칸을 만들지 않는다.
+    html += '<div class="cards-grid">';
+    items.forEach(({vol, pub}) => {
       html += renderVolCard(vol, pub);
-      lastWeekKey = weekKey;
     });
     html += '</div>';
   });
